@@ -2,30 +2,48 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Inventory Shipping Manifest</title>
+  <title>SensationsExhibits Manifest</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
-    @page {
-      size: tabloid landscape;
-      margin: 20mm;
-    }
     body {
       font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 20px;
       background-color: #f4f4f4;
-      color: #333;
+      padding: 20px;
     }
-    h1, h2 {
-      color: #e57200;
+    .branding {
+      background-color: #1c1c1c;
+      padding: 10px;
+      text-align: center;
+      margin-bottom: 20px;
     }
     .header, .section {
       background-color: #fff;
-      border: 1px solid #ccc;
-      border-left: 5px solid #e57200;
       padding: 20px;
       margin-bottom: 20px;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      border-left: 8px solid #e57200;
     }
-    .header input, .section input, .section select, .section textarea {
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header-title {
+      font-size: 32px;
+      color: #e57200;
+      font-weight: bold;
+    }
+    .manifest-label {
+      font-size: 32px;
+      font-weight: bold;
+      color: grey;
+    }
+    .timestamp {
+      font-size: 12px;
+      color: #666;
+    }
+    input, select, textarea {
       width: 100%;
       padding: 6px;
       margin: 5px 0 10px;
@@ -36,80 +54,104 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
       font-size: 12px;
     }
     th, td {
-      border: 1px solid #999;
-      padding: 6px;
+      border: 1px solid #000;
+      padding: 8px;
       text-align: left;
       vertical-align: top;
     }
     th {
       background-color: #e57200;
       color: white;
+      font-weight: bold;
     }
     .key {
       font-style: italic;
-      margin-top: 10px;
       color: #555;
+      margin-bottom: 10px;
     }
-    .button-container {
-      margin-top: 20px;
+    .signatures {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 40px;
+    }
+    .signatures div {
+      width: 48%;
+    }
+    .inventory-controls, .export-controls {
       text-align: right;
+      margin-top: 10px;
     }
-    .button-container button {
-      padding: 10px 20px;
+    .inventory-controls button, .export-controls button {
+      margin-left: 5px;
+      padding: 6px 12px;
       background-color: #e57200;
       border: none;
       color: white;
       border-radius: 4px;
       cursor: pointer;
-      font-size: 14px;
     }
-    .button-container input[type="file"] {
-      display: block;
-      margin-top: 10px;
-    }
-    #search-input {
-      width: 100%;
-      padding: 8px;
-      margin-top: 10px;
+    #crate-filter {
+      width: 200px;
       margin-bottom: 10px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 14px;
+    }
+    #total-count, #crate-summary {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    @media print {
+      .inventory-controls, .export-controls, #search-input, #crate-filter {
+        display: none;
+      }
+      input, select, textarea {
+        border: none;
+        background: none;
+        font-size: 12px;
+      }
     }
   </style>
 </head>
 <body>
   <div class="header">
-    <h1>SensationsExhibits</h1>
-    <p>Page: <input type="text" placeholder="1"></p>
+    <div class="header-top">
+      <div class="header-title">SensationsExhibits</div>
+      <div class="manifest-label">Manifest</div>
+    </div>
+    <p class="timestamp">Timestamp: <span id="timestamp"></span></p>
+    <p>Page: <input type="text" id="page-number" placeholder="1" /></p>
   </div>
 
-  <div class="section">
+  <div class="section" id="client-section">
     <h2>Client & Shipping Information</h2>
-    <p>Client Name: <input type="text" placeholder="Enter Client Name"></p>
-    <p>Job #: <input type="text" placeholder="Enter Job #"></p>
-<p>Project Manager Name: <input type="text" placeholder="Enter Project Manager Name"></p>
-<p>On-site Person Name: <input type="text" placeholder="Enter On-site Person Name"></p>
-<p>Loading Person Name (PL): <input type="text" placeholder="Enter Loading Person Name"></p>
-    <p>Carrier Details: <input type="text" placeholder="Enter Carrier Details"></p>
-    <p>Shipping Date: <input type="date"></p>
-    <p>Receiving Date: <input type="date"></p>
-    <p>BOL Number: <input type="text" placeholder="Enter BOL Number"></p>
-    <p>Loading Approval: <input type="text" placeholder="Enter Approval Signature or Initials"></p>
-    <p>Show Name: <input type="text" placeholder="Enter Show Name"></p>
-    <p>Show Location: <input type="text" placeholder="Enter Show Location"></p>
-    <p>Booth Size: <input type="text" placeholder="Enter Booth Size"></p>
+    <input type="text" placeholder="Client Name" />
+    <input type="text" placeholder="Job #" />
+    <input type="text" placeholder="Project Manager Name" />
+    <input type="text" placeholder="On-site Person Name" />
+    <input type="text" placeholder="Loading Person Name (PL)" />
+    <input type="text" placeholder="Carrier Details" />
+    <input type="date" placeholder="Shipping Date" />
+    <input type="date" placeholder="Receiving Date" />
+    <input type="text" placeholder="BOL Number" />
+    <input type="text" placeholder="Loading Approval" />
+    <input type="text" placeholder="Show Name" />
+    <input type="text" placeholder="Show Location" />
+    <input type="text" placeholder="Booth Size" />
   </div>
 
   <div class="section">
     <h2>Inventory Manifest</h2>
     <p class="key">Inventory Key: N = New, D = Delete, R = Rental</p>
-
     <input type="text" id="search-input" placeholder="Search inventory..." oninput="filterInventory()" />
+    <select id="crate-filter" onchange="filterByCrate()">
+      <option value="">Filter by Crate Number</option>
+    </select>
+
+    <div class="inventory-controls">
+      <button onclick="addRow()">+ Add Inventory</button>
+      <button onclick="removeRow()">- Remove Last</button>
+    </div>
 
     <table>
       <thead>
@@ -125,203 +167,105 @@
           <th>Comments</th>
         </tr>
       </thead>
-      <tbody id="inventory-body">
-        <!-- 25 rows for inventory entries -->
-        <!-- Each row with 9 columns -->
-        <tr>
-          <td><input type='text' placeholder='Crate #'></td>
-          <td><input type='number' placeholder='Weight'></td>
-          <td><input type='number' placeholder='Qty'></td>
-          <td><textarea placeholder='Detailed contents...' rows='2'></textarea></td>
-          <td><input type='text' placeholder='Piece #'></td>
-          <td><input type='text' placeholder='Description'></td>
-          <td>
-            <select>
-              <option value='N'>N</option>
-              <option value='D'>D</option>
-              <option value='R'>R</option>
-            </select>
-          </td>
-          <td>
-            <select>
-              <option value=''>Select</option>
-              <option value='Furniture'>Furniture</option>
-              <option value='Electronics'>Electronics</option>
-              <option value='Decor'>Decor</option>
-              <option value='Other'>Other</option>
-            </select>
-          </td>
-          <td><textarea placeholder='Additional comments...' rows='2'></textarea></td>
-        </tr>
-        <!-- Duplicate row 24 more times with JS on load -->
-      </tbody>
+      <tbody id="inventory-body"></tbody>
     </table>
+
+    <div id="total-count">Total Inventory Count: 0</div>
+    <div id="crate-summary"></div>
+
+    <div class="signatures">
+      <div><strong>Signed By (PM):</strong> ______________________________</div>
+      <div><strong>Signed By (Warehouse):</strong> ______________________________</div>
+    </div>
   </div>
 
-  <div class="button-container">
-    <button onclick="saveManifest()">Save Manifest</button>
+  <div class="export-controls">
+    <button onclick="exportToExcel()">Export to Excel</button>
     <button onclick="window.print()">Print</button>
-    <input type="file" accept=".csv" onchange="importFromCSV(event)" />
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script>
-    // Dynamically add 24 more rows on page load (total 25 rows)
-    document.addEventListener("DOMContentLoaded", () => {
-      const tbody = document.getElementById('inventory-body');
-      const firstRowHTML = tbody.rows[0].outerHTML;
-      for(let i = 1; i < 25; i++) {
-        tbody.insertAdjacentHTML('beforeend', firstRowHTML);
-      }
+    document.addEventListener("DOMContentLoaded", function () {
+      document.getElementById("timestamp").textContent = new Date().toLocaleString();
+      addRow();
     });
 
+    function addRow() {
+      const tbody = document.getElementById("inventory-body");
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td><input type='text' oninput='updateCrateFilter(); updateTotalCount()'></td>
+        <td><input type='number'></td>
+        <td><input type='number' oninput='updateTotalCount()'></td>
+        <td><textarea rows='2'></textarea></td>
+        <td><input type='text'></td>
+        <td><input type='text'></td>
+        <td><select><option>N</option><option>D</option><option>R</option></select></td>
+        <td><select><option></option><option>Furniture</option><option>Electronics</option><option>Decor</option><option>Other</option></select></td>
+        <td><textarea rows='2'></textarea></td>
+      `;
+      tbody.appendChild(row);
+      updateCrateFilter();
+      updateTotalCount();
+    }
+
+    function removeRow() {
+      const tbody = document.getElementById("inventory-body");
+      if (tbody.rows.length > 0) tbody.deleteRow(tbody.rows.length - 1);
+      updateCrateFilter();
+      updateTotalCount();
+    }
+
+    function updateCrateFilter() {
+      const select = document.getElementById("crate-filter");
+      const crateInputs = document.querySelectorAll("#inventory-body tr td:first-child input");
+      const uniqueCrates = new Set(Array.from(crateInputs).map(input => input.value.trim()).filter(Boolean));
+      select.innerHTML = '<option value="">Filter by Crate Number</option>';
+      uniqueCrates.forEach(crate => {
+        const option = document.createElement("option");
+        option.value = crate;
+        option.textContent = crate;
+        select.appendChild(option);
+      });
+    }
+
+    function filterByCrate() {
+      const crate = document.getElementById("crate-filter").value;
+      document.querySelectorAll("#inventory-body tr").forEach(row => {
+        const cellValue = row.cells[0].querySelector("input").value.trim();
+        row.style.display = !crate || crate === cellValue ? "" : "none";
+      });
+    }
+
+    function updateTotalCount() {
+      const rows = document.querySelectorAll("#inventory-body tr");
+      let total = 0;
+      const crateCounts = {};
+
+      rows.forEach(row => {
+        const crate = row.cells[0].querySelector("input").value.trim();
+        const qtyInput = row.cells[2].querySelector("input");
+        const qty = parseInt(qtyInput.value, 10);
+        if (!isNaN(qty)) {
+          total += qty;
+          crateCounts[crate] = (crateCounts[crate] || 0) + qty;
+        }
+      });
+
+      document.getElementById("total-count").textContent = `Total Inventory Count: ${total}`;
+
+      const summary = Object.entries(crateCounts)
+        .map(([crate, count]) => `Crate ${crate}: ${count} items`)
+        .join("<br>");
+      document.getElementById("crate-summary").innerHTML = summary;
+    }
+
     function filterInventory() {
-      const filter = document.getElementById('search-input').value.toLowerCase();
-      const rows = document.querySelectorAll('#inventory-body tr');
-      rows.forEach(row => {
-        const cellsText = Array.from(row.querySelectorAll('input, textarea, select')).map(input => input.value.toLowerCase()).join(' ');
-        if(cellsText.indexOf(filter) > -1) {
-          row.style.display = '';
-        } else {
-          row.style.display = 'none';
-        }
+      const filter = document.getElementById("search-input").value.toLowerCase();
+      document.querySelectorAll("#inventory-body tr").forEach(row => {
+        const text = Array.from(row.querySelectorAll("input, textarea, select")).map(el => el.value.toLowerCase()).join(" ");
+        row.style.display = text.includes(filter) ? "" : "none";
       });
-    }
-
-    function saveManifest() {
-      const wb = XLSX.utils.book_new();
-
-      // --- Client & Shipping Info Sheet ---
-      const clientSection = document.querySelectorAll('.section')[0];
-      const clientInputs = clientSection.querySelectorAll('input[type="text"], input[type="date"]');
-      const clientHeaders = ['Field', 'Value'];
-      const clientData = [
-        ['Client Name', clientInputs[0].value],
-        ['Job ID', clientInputs[1].value],
-        ['Carrier Details', clientInputs[2].value],
-        ['Shipping Date', clientInputs[3].value],
-        ['Receiving Date', clientInputs[4].value],
-        ['BOL Number', clientInputs[5].value],
-        ['Loading Approval', clientInputs[6].value],
-        ['Show Name', clientInputs[7].value],
-        ['Show Location', clientInputs[8].value],
-        ['Booth Size', clientInputs[9].value]
-      ];
-      const wsClient = XLSX.utils.aoa_to_sheet([clientHeaders, ...clientData]);
-
-      // Style client sheet header
-      const headerRangeClient = XLSX.utils.decode_range(wsClient['!ref']);
-      for(let C = headerRangeClient.s.c; C <= headerRangeClient.e.c; ++C) {
-        const cell_address = XLSX.utils.encode_cell({r:0, c:C});
-        if(!wsClient[cell_address]) continue;
-        wsClient[cell_address].s = {
-          font: { bold: true, color: {rgb: "FFFFFF"} },
-          fill: { fgColor: { rgb: "e57200" } },
-          alignment: { vertical: "center", horizontal: "center" },
-          border: {
-            top: {style: "thin", color: {rgb: "000000"}},
-            bottom: {style: "thin", color: {rgb: "000000"}},
-            left: {style: "thin", color: {rgb: "000000"}},
-            right: {style: "thin", color: {rgb: "000000"}}
-          }
-        };
-      }
-      wsClient['!cols'] = [{wch: 20}, {wch: 40}];
-      XLSX.utils.book_append_sheet(wb, wsClient, 'Client & Shipping Info');
-
-      // --- Inventory Sheet ---
-      const inventoryHeaders = [
-        'Crate Number', 'Weight (lbs)', 'Qty', 'Contents',
-        'Piece Number', 'Description', 'Inventory (N/D/R)',
-        'Item Type', 'Comments'
-      ];
-
-      const rows = document.querySelectorAll('#inventory-body tr');
-      const inventoryData = [inventoryHeaders];
-      rows.forEach(row => {
-        const inputs = row.querySelectorAll('input, select, textarea');
-        const rowData = [];
-        inputs.forEach(input => rowData.push(input.value));
-        inventoryData.push(rowData);
-      });
-
-      const wsInventory = XLSX.utils.aoa_to_sheet(inventoryData);
-
-      wsInventory['!cols'] = [
-        {wch: 12},
-        {wch: 10},
-        {wch: 6},
-        {wch: 40},
-        {wch: 12},
-        {wch: 20},
-        {wch: 10},
-        {wch: 15},
-        {wch: 30}
-      ];
-
-      const headerRange = XLSX.utils.decode_range(wsInventory['!ref']);
-      for (let C = headerRange.s.c; C <= headerRange.e.c; ++C) {
-        const cell_address = XLSX.utils.encode_cell({r:0, c:C});
-        if (!wsInventory[cell_address]) continue;
-        wsInventory[cell_address].s = {
-          font: { bold: true, color: {rgb: "FFFFFF"} },
-          fill: { fgColor: { rgb: "e57200" } },
-          alignment: { vertical: "center", horizontal: "center" },
-          border: {
-            top: {style: "thin", color: {rgb: "000000"}},
-            bottom: {style: "thin", color: {rgb: "000000"}},
-            left: {style: "thin", color: {rgb: "000000"}},
-            right: {style: "thin", color: {rgb: "000000"}}
-          }
-        };
-      }
-
-      for (let R = 1; R <= headerRange.e.r; ++R) {
-        for (let C = headerRange.s.c; C <= headerRange.e.c; ++C) {
-          const cell_address = XLSX.utils.encode_cell({r: R, c: C});
-          if (!wsInventory[cell_address]) continue;
-          const wrapText = (C === 3 || C === 8);
-          wsInventory[cell_address].s = {
-            alignment: { vertical: "top", horizontal: "left", wrapText },
-            border: {
-              top: {style: "thin", color: {rgb: "000000"}},
-              bottom: {style: "thin", color: {rgb: "000000"}},
-              left: {style: "thin", color: {rgb: "000000"}},
-              right: {style: "thin", color: {rgb: "000000"}}
-            }
-          };
-        }
-      }
-      wsInventory['!rows'] = [];
-      for(let i=0; i<=headerRange.e.r; i++) {
-        if(i === 0) {
-          wsInventory['!rows'][i] = {hpt: 20};
-        } else {
-          wsInventory['!rows'][i] = {hpt: 30};
-        }
-      }
-
-      XLSX.utils.book_append_sheet(wb, wsInventory, 'Inventory');
-
-      XLSX.writeFile(wb, 'inventory_manifest.xlsx');
-    }
-
-    function importFromCSV(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const lines = e.target.result.split('\n');
-        const rows = document.querySelectorAll('#inventory-body tr');
-        lines.forEach((line, i) => {
-          if(i >= rows.length) return;
-          const values = line.split(',');
-          const inputs = rows[i].querySelectorAll('input, select, textarea');
-          if (inputs) values.forEach((val, j) => inputs[j] && (inputs[j].value = val.trim()));
-        });
-      };
-      reader.readAsText(file);
     }
   </script>
 </body>
